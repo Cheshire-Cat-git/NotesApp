@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -20,6 +21,10 @@ fun ViewNoteScreen(
     noteId: Int
 ) {
     val note by viewModel.getNoteById(noteId).observeAsState(initial = null)
+
+    LaunchedEffect(noteId) {
+        viewModel.logViewNote()
+    }
 
     Scaffold(
         topBar = {

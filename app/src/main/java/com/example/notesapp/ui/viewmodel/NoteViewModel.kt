@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 class NoteViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: NoteRepository
     val allNotes: LiveData<List<Note>>
+    private val firebaseAnalytics = com.google.firebase.analytics.FirebaseAnalytics.getInstance(application)
 
     init {
         val noteDao = NoteDatabase.getDatabase(application).noteDao()
@@ -24,10 +25,15 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         return repository.getNoteById(id)
     }
 
+    fun logViewNote() {
+        firebaseAnalytics.logEvent("view_note", null)
+    }
+
     fun insertNote(title: String, content: String, onInserted: () -> Unit = {}) {
         viewModelScope.launch(Dispatchers.IO) {
             val newNote = Note(title = title, content = content, timestamp = System.currentTimeMillis())
             repository.insert(newNote)
+            firebaseAnalytics.logEvent("add_note", null)
             viewModelScope.launch(Dispatchers.Main) {
                 onInserted()
             }
@@ -47,6 +53,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteNote(note: Note, onDeleted: () -> Unit = {}) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.delete(note)
+            firebaseAnalytics.logEvent("remove_note", null)
             viewModelScope.launch(Dispatchers.Main) {
                 onDeleted()
             }
@@ -56,6 +63,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteNoteById(id: Int, onDeleted: () -> Unit = {}) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.deleteById(id)
+            firebaseAnalytics.logEvent("remove_note", null)
             viewModelScope.launch(Dispatchers.Main) {
                 onDeleted()
             }
